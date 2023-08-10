@@ -1,34 +1,28 @@
+# app/controllers/ratings_controller.rb
 class RatingsController < ApplicationController
-  before_action :authenticate_user!, only: [:create, :update, :destroy]
+  before_action :authorize_normal_user, only: :create
 
   def create
     activity = Activity.find(params[:activity_id])
-    if current_user.normal?
-      rating = current_user.ratings.build(activity: activity, value: params[:value])
+    rating = activity.ratings.build(rating_params)
+    rating.user = current_user
 
-      if rating.save
-        render json: rating, status: :created
-      else
-        render json: { errors: rating.errors.full_messages }, status: :unprocessable_entity
-      end
+    if rating.save
+      render json: rating, status: :created
     else
-      render json: { errors: ['You are not authorized to rate this activity'] }, status: :unauthorized
+      render json: { error: rating.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
-  def update
-    rating = current_user.ratings.find(params[:id])
+  private
 
-    if rating.update(value: params[:value])
-      render json: rating, status: :ok
-    else
-      render json: { errors: rating.errors.full_messages }, status: :unprocessable_entity
-    end
+  def rating_params
+    params.require(:rating).permit(:value)
   end
 
-  def destroy
-    rating = current_user.ratings.find(params[:id])
-    rating.destroy
-    render json: {}, status: :no_content
+  def authorize_normal_user
+    unless current_user && current_user.normal?
+      render json: { error: 'Only normal users can rate activities.' }, status: :forbidden
+    end
   end
 end

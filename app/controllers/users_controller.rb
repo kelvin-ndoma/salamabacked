@@ -2,12 +2,15 @@ class UsersController < ApplicationController
   skip_before_action :authorize, only: [:create, :show]
  
   def create 
-    user = User.create!(user_params)
-    if user
+    user = User.new(user_params)
+    # Set the default role to 'normal' for newly created users
+    user.role = :normal
+
+    if user.save
       session[:user_id] = user.id
       render json: user, status: :created
     else
-      render json: { error: user.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
     end
   end
 

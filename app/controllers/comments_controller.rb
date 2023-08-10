@@ -21,7 +21,7 @@ class CommentsController < ApplicationController
   end
 
   def authorize_normal_user
-    unless current_user && current_user.normal?
+    unless current_user.normal?
       render json: { error: 'Only normal users can comment.' }, status: :forbidden
     end
   end

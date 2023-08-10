@@ -1,5 +1,6 @@
 class ActivitiesController < ApplicationController
-  before_action :authenticate_user!, only: [:create, :update, :destroy]
+  before_action :authenticate_user!, only: [:create, :update, :destroy, :rate, :comment]
+
   
   def index
     activities = Activity.all
@@ -53,9 +54,10 @@ class ActivitiesController < ApplicationController
 
   def comment
     activity = Activity.find(params[:id])
+    puts "Current User Role: #{current_user.role}" # Add this line to debug
     if current_user.normal?
       comment = current_user.comments.build(activity: activity, content: params[:content])
-
+  
       if comment.save
         render json: comment, status: :created
       else
@@ -65,6 +67,7 @@ class ActivitiesController < ApplicationController
       render json: { errors: ['You are not authorized to comment on this activity'] }, status: :unauthorized
     end
   end
+  
 
   private
 
