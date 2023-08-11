@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  # Likes routes
+  get 'likes/create'
+  get 'likes/destroy'
+
   # Signup
   get '/signup', to: 'users#new', as: 'signup'
   post '/signup', to: 'users#create'
@@ -21,4 +25,14 @@ Rails.application.routes.draw do
 
   # User routes
   resources :users, only: [:show, :create, :destroy]
+
+  # Blogs routes
+  resources :blogs do
+    member do
+      post 'toggle_like'
+    end
+  end
+
+  # Custom route for user's blogs
+  get '/my_blogs', to: 'blogs#my_blogs', as: 'my_blogs'
 end
